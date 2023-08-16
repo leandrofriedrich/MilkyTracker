@@ -76,7 +76,7 @@ void Tracker::buildDefaultSettings()
 	settingsDatabase->store("MIXERVOLUME", 256);
 	settingsDatabase->store("MIXERSHIFT", 1);
 	settingsDatabase->store("RAMPING", 1);
-	settingsDatabase->store("INTERPOLATION", 1);
+	settingsDatabase->store("INTERPOLATION", 4);
 	settingsDatabase->store("MIXERFREQ", PlayerMaster::getPreferredSampleRate());
 #ifdef __FORCEPOWEROFTWOBUFFERSIZE__
 	settingsDatabase->store("FORCEPOWEROFTWOBUFFERSIZE", 1);
@@ -104,11 +104,12 @@ void Tracker::buildDefaultSettings()
 
 	// ---------- Layout ----------
 	settingsDatabase->store("FULLSCREEN", 0);
+	settingsDatabase->store("CLASSIC", 0);
 
 	settingsDatabase->store("XRESOLUTION", PPScreen::getDefaultWidth());
 	settingsDatabase->store("YRESOLUTION", PPScreen::getDefaultHeight());
 
-	settingsDatabase->store("SCREENSCALEFACTOR", 1);
+	settingsDatabase->store("SCREENSCALEFACTOR", 2);
 
 	settingsDatabase->store("ENVELOPEEDITORSCALE", 256);
 
@@ -131,7 +132,7 @@ void Tracker::buildDefaultSettings()
 	// Pattern spacing
 	settingsDatabase->store("SPACING", 0);
 	// Trace instruments setting
-	settingsDatabase->store("INSTRUMENTBACKTRACE", 0);
+	settingsDatabase->store("INSTRUMENTBACKTRACE", 1);
 	// TAB to note?
 	settingsDatabase->store("TABTONOTE", 1);
 	// mouseclick to cursor?
@@ -139,7 +140,7 @@ void Tracker::buildDefaultSettings()
 	// autoresize pattern on paste?
 	settingsDatabase->store("PATTERNAUTORESIZE", 0);
 	// Show hex row numbers
-	settingsDatabase->store("HEXCOUNT", 1);
+	settingsDatabase->store("HEXCOUNT", 0);
 	// Show zeroes instead of dots for unused effects
 	settingsDatabase->store("SHOWZEROEFFECT", 0);
 	// Wrap around cursor
@@ -153,11 +154,7 @@ void Tracker::buildDefaultSettings()
 	// Live switch
 	settingsDatabase->store("LIVESWITCH", 0);
 	// Our default edit mode
-#ifdef __LOWRES__
 	settingsDatabase->store("EDITMODE", EditModeMilkyTracker);
-#else
-	settingsDatabase->store("EDITMODE", EditModeFastTracker);
-#endif
 	// Our default scrolling mode
 	settingsDatabase->store("SCROLLMODE", ScrollModeStayInCenter);
 	// Mute fading value (from 0 to 100 percent)
@@ -167,7 +164,7 @@ void Tracker::buildDefaultSettings()
 	// Modulo for the first pattern highlight
 	settingsDatabase->store("HIGHLIGHTROW1", 0);
 	// Modulo for the second pattern highlight
-	settingsDatabase->store("HIGHLIGHTMODULO2", 8);
+	settingsDatabase->store("HIGHLIGHTMODULO2", 2);
 	// Modulo for the second pattern highlight
 	settingsDatabase->store("HIGHLIGHTROW2", 0);
 
@@ -193,13 +190,13 @@ void Tracker::buildDefaultSettings()
 	// orderlist is extended
 	settingsDatabase->store("EXTENDEDORDERLIST", 0);
 	// current row add
-	settingsDatabase->store("ROWINSERTADD", 1);
+	settingsDatabase->store("ROWINSERTADD", 0);
 	// show title field
 	settingsDatabase->store("TITLEPAGE", TitlePageManager::PageTitle);
 	// sample editor last settings
 	settingsDatabase->store("SAMPLEEDITORLASTVALUES", "");
 	// no virtual channels for instrument playback
-	settingsDatabase->store("VIRTUALCHANNELS", 0);
+	settingsDatabase->store("VIRTUALCHANNELS", 1);
     // default number of XM channel limit
     settingsDatabase->store("XMCHANNELLIMIT", 32);
 	// enable multichn recording by default
@@ -207,7 +204,7 @@ void Tracker::buildDefaultSettings()
 	// enable multichn keyjazzing by default
 	settingsDatabase->store("MULTICHN_KEYJAZZ", 1);
 	// disable multichn edit by default
-	settingsDatabase->store("MULTICHN_EDIT", 0);
+	settingsDatabase->store("MULTICHN_EDIT", 1);
 	// enable key off recording by default
 	settingsDatabase->store("MULTICHN_RECORDKEYOFF", 1);
 	// disable note delay recording
@@ -244,7 +241,7 @@ void Tracker::buildDefaultSettings()
 	settingsDatabase->store("HDRECORDER_MIXERVOLUME", 256);
 	settingsDatabase->store("HDRECORDER_MIXERSHIFT", 1);
 	settingsDatabase->store("HDRECORDER_RAMPING", 1);
-	settingsDatabase->store("HDRECORDER_INTERPOLATION", 1);
+	settingsDatabase->store("HDRECORDER_INTERPOLATION", 4);
 	settingsDatabase->store("HDRECORDER_ALLOWMUTING", 0);
 
 	for (i = 0; i < NUMEFFECTMACROS; i++)
@@ -380,6 +377,20 @@ void Tracker::applySettingByKey(PPDictionaryKey* theKey, TMixerSettings& setting
 			}
 		}
 	}
+	else if (theKey->getKey().compareTo("CLASSIC") == 0)
+	{
+    // we keep this behind a setting for those who still want them
+    settingsDatabase->store("EDITMODE", EditModeFastTracker);  // not preferred by most new users (who don't know ft2)
+    settingsDatabase->store("INTERPOLATION", 1);               // fast-sinc runs fine on rpi zero in 2023
+    settingsDatabase->store("HDRECORDER_INTERPOLATION", 1);    
+    settingsDatabase->store("INSTRUMENTBACKTRACE", 1);          
+  	settingsDatabase->store("HIGHLIGHTMODULO2", 2);             
+   	settingsDatabase->store("ROWINSERTADD", 1);                 
+    settingsDatabase->store("VIRTUALCHANNELS", 0);              
+    settingsDatabase->store("MULTICHN_EDIT", 0); 
+    settingsDatabase->store("HEXCOUNT", 0);                  
+    settingsDatabase->store("SCREENSCALEFACTOR", 1);
+  }  
 	else if (theKey->getKey().compareTo("ENVELOPEEDITORSCALE") == 0)
 	{
 		if (sectionInstruments && sectionInstruments->getEnvelopeEditor())

@@ -172,6 +172,7 @@ enum ControlIDs
 	CHECKBOX_SETTINGS_HEXCOUNT,
 	CHECKBOX_SETTINGS_SHOWZEROEFFECT,
 	CHECKBOX_SETTINGS_FULLSCREEN,
+	CHECKBOX_SETTINGS_CLASSIC,
 	LISTBOX_SETTINGS_RESOLUTIONS,
 	BUTTON_RESOLUTIONS_CUSTOM,
 	BUTTON_RESOLUTIONS_FULL,
@@ -1235,12 +1236,19 @@ public:
 		PPCheckBox* checkBox = new PPCheckBox(CHECKBOX_SETTINGS_FULLSCREEN, screen, this, PPPoint(x2 + 4 + 17 * 8 + 4, y2 - 1));
 		container->addControl(checkBox);
 		container->addControl(new PPCheckBoxLabel(0, NULL, this, PPPoint(x2 + 4, y2), "Fullscreen:", checkBox, true));
+
+		y2+=4+11;
+		checkBox = new PPCheckBox(CHECKBOX_SETTINGS_CLASSIC, screen, this, PPPoint(x2 + 4 + 17 * 8 + 4, y2 - 1));
+		container->addControl(checkBox);
+		container->addControl(new PPCheckBoxLabel(0, NULL, this, PPPoint(x2 + 4, y2), "Classic Mode:", checkBox, false));
 	}
 
 	virtual void update(PPScreen* screen, TrackerSettingsDatabase* settingsDatabase, ModuleEditor& moduleEditor)
 	{
 		pp_int32 v = settingsDatabase->restore("FULLSCREEN")->getIntValue();
 		static_cast<PPCheckBox*>(container->getControlByID(CHECKBOX_SETTINGS_FULLSCREEN))->checkIt(v!=0);
+		v = settingsDatabase->restore("CLASSIC")->getIntValue();
+		static_cast<PPCheckBox*>(container->getControlByID(CHECKBOX_SETTINGS_CLASSIC))->checkIt(v!=0);
 	}
 
 };
@@ -2060,6 +2068,18 @@ pp_int32 SectionSettings::handleEvent(PPObject* sender, PPEvent* event)
 
 				tracker.settingsDatabase->store("FULLSCREEN", (pp_int32)reinterpret_cast<PPCheckBox*>(sender)->isChecked());
 				update();
+				break;
+			}
+			
+      case CHECKBOX_SETTINGS_CLASSIC:
+			{
+				if (event->getID() != eCommand)
+					break;
+
+				tracker.settingsDatabase->store("CLASSIC", (pp_int32)reinterpret_cast<PPCheckBox*>(sender)->isChecked());
+				update();
+        // refresh sections 
+        for (pp_int32 i = 0; i < tracker.sections->size(); i++) tracker.sections->get(i)->update(true);
 				break;
 			}
 

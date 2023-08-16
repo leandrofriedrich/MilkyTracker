@@ -81,7 +81,7 @@ bool Tracker::getFullScreenFlagFromDatabase()
 
 pp_int32 Tracker::getScreenScaleFactorFromDatabase()
 {
-	pp_int32 scaleFactor = 1;
+	pp_int32 scaleFactor = 2;
 	
 	if (XMFile::exists(System::getConfigFileName()))
 	{

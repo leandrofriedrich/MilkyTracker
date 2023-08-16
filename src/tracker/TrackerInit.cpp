@@ -55,6 +55,7 @@
 #include "SectionAbout.h"
 
 #include "InputControlListener.h"
+#include "TrackerSettingsDatabase.h"
 
 #include "ControlIDs.h"
 #include "SIPButtons.h"
@@ -127,7 +128,8 @@ void Tracker::initUI()
 
 	button = new PPButton(MAINMENU_PLAY_SONG, screen, this, PPPoint(containerAbout->getLocation().x + containerAbout->getSize().width + aboutButtonOffset + (29+24+24) + 2, height2+1), PPSize(23, 9), false);
 	button->setFont(PPFont::getFont(PPFont::FONT_TINY));
-	button->setText("Play");
+	PPString play = settingsDatabase->restore("CLASSIC")->getIntValue() == 0 ? "\x10" : "Play";
+  button->setText(play);	
 	containerAbout->addControl(button);
 
 	button = new PPButton(MAINMENU_PLAY_PATTERN, screen, this, PPPoint(containerAbout->getLocation().x + containerAbout->getSize().width + aboutButtonOffset + (29+24+24) + 2 + 23, height2+1), PPSize(23, 9), false);
@@ -203,7 +205,8 @@ void Tracker::initUI()
 
 		button = new PPButton(MAINMENU_PLAY_SONG, screen, this, PPPoint(container->getLocation().x + 1, container->getLocation().y + 2 + dy*3), PPSize(container->getSize().width-3, dy), false);
 		button->setFont(PPFont::getFont(PPFont::FONT_TINY));
-		button->setText("Play");
+    PPString play = settingsDatabase->restore("CLASSIC")->getIntValue() == 0 ? "\x10" : "Play";
+		button->setText(play);
 		container->addControl(button);
 
 		button = new PPButton(MAINMENU_STOP, screen, this, PPPoint(container->getLocation().x + 1, container->getLocation().y + 2 + dy*4), PPSize(container->getSize().width-3, dy), false);
@@ -733,7 +736,9 @@ void Tracker::initSectionMainOptions(pp_int32 x, pp_int32 y)
 		
 	}
 
-	static_cast<PPButton*>(container->getControlByID(MAINMENU_PLAY_SONG))->setText("Play Sng");	
+	PPString play = settingsDatabase->restore("CLASSIC")->getIntValue() == 0 ? "\x10" : "Play";
+  printf("classic=%i\n",settingsDatabase->restore("CLASSIC")->getIntValue());
+	static_cast<PPButton*>(container->getControlByID(MAINMENU_PLAY_SONG))->setText(play);	
 	static_cast<PPButton*>(container->getControlByID(MAINMENU_PLAY_PATTERN))->setText("Play Pat");
 	//static_cast<PPButton*>(container->getControlByID(MAINMENU_STOP))->setText("Stop");
 	// Setup "Stop" PPButton
