@@ -54,6 +54,7 @@ PPScreen::PPScreen(PPDisplayDeviceBase* displayDevice, EventListenerInterface* e
 	focusedControl(NULL),
 	beforeModalFocusedControl(NULL),
 	modalControl(NULL),
+  classic(false),
 	showDragHilite(false),
 	rootContainer(NULL),
 	lastMouseOverControl(NULL)

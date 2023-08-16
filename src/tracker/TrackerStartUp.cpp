@@ -81,7 +81,7 @@ bool Tracker::getFullScreenFlagFromDatabase()
 
 pp_int32 Tracker::getScreenScaleFactorFromDatabase()
 {
-	pp_int32 scaleFactor = 2;
+	pp_int32 scaleFactor = 1;
 	
 	if (XMFile::exists(System::getConfigFileName()))
 	{
@@ -181,19 +181,6 @@ void Tracker::startUp(bool forceNoSplash/* = false*/)
 	else
 		screen->enableDisplay(false);	
 
-	initUI();	
-
-	pp_int32 dTime;
-
-	if (!noSplash)
-	{
-		dTime = (signed)(PPGetTickCount() - startTime);
-		if (dTime > SPLASH_WAIT_TIME) dTime = SPLASH_WAIT_TIME;
-		if (dTime < 0) dTime = 0;	
-		System::msleep(SPLASH_WAIT_TIME/2 - dTime);
-		startTime = PPGetTickCount();
-	}
-	
 	if (XMFile::exists(System::getConfigFileName()))
 	{
 		// create as copy from existing database, so all keys are in there
@@ -209,6 +196,20 @@ void Tracker::startUp(bool forceNoSplash/* = false*/)
 		settingsDatabase = settingsDatabaseCopy;
 		settingsDatabaseCopy = NULL;
 	}
+
+  initUI();	// UI has access to settings from disk now
+
+	pp_int32 dTime;
+
+	if (!noSplash)
+	{
+		dTime = (signed)(PPGetTickCount() - startTime);
+		if (dTime > SPLASH_WAIT_TIME) dTime = SPLASH_WAIT_TIME;
+		if (dTime < 0) dTime = 0;	
+		System::msleep(SPLASH_WAIT_TIME/2 - dTime);
+		startTime = PPGetTickCount();
+	}
+	
 
 	// apply ALL settings, not just the different ones
 	applySettings(settingsDatabase, NULL, true, false);

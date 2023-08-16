@@ -484,7 +484,6 @@ public:
 		checkBox = new PPCheckBox(CHECKBOX_SETTINGS_RAMPING, screen, this, PPPoint(x + 4 + 17 * 8 + 4, y2 - 1));
 		container->addControl(checkBox);
 		container->addControl(new PPCheckBoxLabel(0, NULL, this, PPPoint(x + 4, y2), "Volume ramping:", checkBox, true));
-		
 		//container->addControl(new PPSeperator(0, screen, PPPoint(x + 158, y+4), UPPERFRAMEHEIGHT-8, TrackerConfig::colorThemeMain, false));
 	}
 
@@ -2078,8 +2077,8 @@ pp_int32 SectionSettings::handleEvent(PPObject* sender, PPEvent* event)
 
 				tracker.settingsDatabase->store("CLASSIC", (pp_int32)reinterpret_cast<PPCheckBox*>(sender)->isChecked());
 				update();
-        // refresh sections 
-        for (pp_int32 i = 0; i < tracker.sections->size(); i++) tracker.sections->get(i)->update(true);
+        SystemMessage message(*tracker.screen, SystemMessage::MessageClassicChangeRestart);
+        message.show();
 				break;
 			}
 

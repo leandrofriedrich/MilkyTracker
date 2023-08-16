@@ -60,6 +60,11 @@ void SystemMessage::show()
 			message = "MilkyTracker needs to be restarted to apply new video mode.";
 			break;
 
+		case MessageClassicChangeRestart:
+			header = "Please restart";
+			message = "MilkyTracker needs to be restarted to apply classic settings.";
+			break;
+
 		case MessageLimitedInput:
 			header = "Note";
 			message = "Due to limited input this edit mode might not be fully usable on a low-res device.";

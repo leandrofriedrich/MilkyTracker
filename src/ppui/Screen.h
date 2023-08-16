@@ -66,6 +66,7 @@ protected:
 	PPSimpleVector<PPControl>* timerEventControls;
 	
 	bool showDragHilite;
+  bool classic;
 	
 	PPContainer* rootContainer;
 
@@ -163,6 +164,9 @@ public:
 	MouseCursorTypes getCurrentActiveMouseCursor() const;
 	
 	void shutDown();
+
+  bool isClassic(){ return this->classic; }
+  void setClassic(bool state){ this->classic = state; }
 };
 
 #endif

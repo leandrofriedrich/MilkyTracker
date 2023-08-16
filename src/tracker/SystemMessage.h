@@ -45,7 +45,8 @@ public:
 		MessageSoundDriverInitFailed,
 		MessageFullScreenFailed,
 		MessageResChangeRestart,
-		MessageLimitedInput
+		MessageLimitedInput,
+		MessageClassicChangeRestart
 	};
 	
 	SystemMessage(PPScreen& screen, Messages message);

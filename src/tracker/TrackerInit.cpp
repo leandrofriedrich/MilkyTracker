@@ -65,6 +65,8 @@ void Tracker::initUI()
 	pp_int32 c;
 	PPButton* button = NULL;
 	
+  screen->setClassic( settingsDatabase->restore("CLASSIC")->getIntValue() == 1 );
+	
 	// ---------- initialise sections --------
 	for (pp_int32 i = 0; i < sections->size(); i++)
 		sections->get(i)->init();
@@ -420,11 +422,7 @@ void Tracker::initUI()
 
 	updatePatternEditorControl(false);
 
-#ifdef __LOWRES__
-	switchEditMode(EditModeMilkyTracker);
-#else
-	switchEditMode(EditModeFastTracker);
-#endif
+	switchEditMode(EditModeMilkyTracker); // milkytracker is default for milkytracker
 
 	screen->setFocus(patternEditorControl);
 	
@@ -737,13 +735,13 @@ void Tracker::initSectionMainOptions(pp_int32 x, pp_int32 y)
 	}
 
 	PPString play = settingsDatabase->restore("CLASSIC")->getIntValue() == 0 ? "\x10" : "Play";
-  printf("classic=%i\n",settingsDatabase->restore("CLASSIC")->getIntValue());
 	static_cast<PPButton*>(container->getControlByID(MAINMENU_PLAY_SONG))->setText(play);	
-	static_cast<PPButton*>(container->getControlByID(MAINMENU_PLAY_PATTERN))->setText("Play Pat");
-	//static_cast<PPButton*>(container->getControlByID(MAINMENU_STOP))->setText("Stop");
+	PPString playpat = settingsDatabase->restore("CLASSIC")->getIntValue() == 0 ? "\x1f" : "Pat";
+	static_cast<PPButton*>(container->getControlByID(MAINMENU_PLAY_PATTERN))->setText(playpat);
 	// Setup "Stop" PPButton
 	button = static_cast<PPButton*>(container->getControlByID(MAINMENU_STOP));
-	button->setText("Stop");
+	PPString stop = settingsDatabase->restore("CLASSIC")->getIntValue() == 0 ? "\xa7" : "Stop";
+	button->setText(stop);
 	button->setSize(PPSize(77>>1, bHeight-1));
 	// Add "Edit" button
 	button = new PPButton(MAINMENU_EDIT, screen, this, 
@@ -790,15 +788,18 @@ void Tracker::initSectionMainOptions(pp_int32 x, pp_int32 y)
 	container->addControl(button);
 
 	button = static_cast<PPButton*>(container->getControlByID(MAINMENU_PLAY_PATTERN));
-	button->setText("Pat");
-	button->setSize(PPSize((77>>1)-1, bHeight-1));
+	button->setText(playpat);
+  pp_uint32 width = settingsDatabase->restore("CLASSIC")->getIntValue() == 1 ? (77>>1) : 77;
+	button->setSize(PPSize(width-1, bHeight-1));
 
 	PPPoint p = button->getLocation();
 	p.x+=button->getSize().width+1;
 	
-	button = new PPButton(MAINMENU_PLAY_POSITION, screen, this, p, PPSize((77>>1)+1, bHeight-1));
-	button->setText("Pos");
-	container->addControl(button);
+	if( settingsDatabase->restore("CLASSIC")->getIntValue() == 1 ){
+    button = new PPButton(MAINMENU_PLAY_POSITION, screen, this, p, PPSize((77>>1)+1, bHeight-1));
+    button->setText("Pos");
+    container->addControl(button);
+  }
 
 	screen->addControl(container);	
 }
@@ -884,15 +885,17 @@ void Tracker::initListboxesSection(pp_int32 x, pp_int32 y)
 		
 		// play pattern/position
 		button = static_cast<PPButton*>(container->getControlByID(MAINMENU_PLAY_PATTERN));
-		button->setText("Pat");
+		button->setText(playpat);
 		button->setSize(PPSize((73>>1)-1, bHeight-1));
 		
 		PPPoint p = button->getLocation();
 		p.x+=button->getSize().width+1;
 		
-		button = new PPButton(MAINMENU_PLAY_POSITION, screen, this, p, PPSize((73>>1)+1, bHeight-1));
-		button->setText("Pos");
-		container->addControl(button);
+    if( settingsDatabase->restore("CLASSIC")->getIntValue() == 1 ){
+      button = new PPButton(MAINMENU_PLAY_POSITION, screen, this, p, PPSize((73>>1)+1, bHeight-1));
+      button->setText("Pos");
+      container->addControl(button);
+    }
 		
 		screen->addControl(container);
 		
@@ -1007,14 +1010,17 @@ void Tracker::initListboxesSection(pp_int32 x, pp_int32 y)
 		container->addControl(button);
 		
 		x2+=button->getSize().width+1;
-		button = new PPButton(MAINMENU_PLAY_PATTERN, screen, this, PPPoint(x2, y2), PPSize((77>>1)-1, bHeight-1));
+    pp_uint32 width = settingsDatabase->restore("CLASSIC")->getIntValue() == 1 ? (77>>1) : 77;
+		button = new PPButton(MAINMENU_PLAY_PATTERN, screen, this, PPPoint(x2, y2), PPSize(width-1, bHeight-1));
 		button->setText("Pat");		
 		container->addControl(button);
 
-		x2+=button->getSize().width+1;
-		button = new PPButton(MAINMENU_PLAY_POSITION, screen, this, PPPoint(x2, y2), PPSize((77>>1)+1, bHeight-1));
-		button->setText("Pos");
-		container->addControl(button);
+    if( settingsDatabase->restore("CLASSIC")->getIntValue() == 1 ){
+      x2+=button->getSize().width+1;
+      button = new PPButton(MAINMENU_PLAY_POSITION, screen, this, PPPoint(x2, y2), PPSize((77>>1)+1, bHeight-1));
+      button->setText("Pos");
+      container->addControl(button);
+    }
 		
 		x2+=button->getSize().width+1;
 		button = new PPButton(MAINMENU_STOP, screen, this, PPPoint(x2, y2), PPSize((77>>1), bHeight-1));

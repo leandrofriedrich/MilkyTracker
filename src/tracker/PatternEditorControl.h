@@ -184,6 +184,8 @@ private:
 	pp_int32 lastMenuInvokeChannel;
 
 	PPContextMenu* editMenuControl;
+	PPContextMenu* fileMenuControl;
+	PPContextMenu* channelMenuControl;
 
 	// Keyboard shortcuts
 	PPKeyBindings<TPatternEditorKeyBindingHandler>* eventKeyDownBindings;
@@ -375,6 +377,8 @@ private:
 		MenuCommandIDSelectChannel,
 		MenuCommandIDPorousPaste,
 		MenuCommandIDSwapChannels,
+		MenuCommandIDChannelAdd,
+		MenuCommandIDChannelDelete
 	};
 	
 	void invokeMenu(pp_int32 channel, const PPPoint& p);

@@ -109,7 +109,7 @@ void Tracker::buildDefaultSettings()
 	settingsDatabase->store("XRESOLUTION", PPScreen::getDefaultWidth());
 	settingsDatabase->store("YRESOLUTION", PPScreen::getDefaultHeight());
 
-	settingsDatabase->store("SCREENSCALEFACTOR", 2);
+	settingsDatabase->store("SCREENSCALEFACTOR", 1);
 
 	settingsDatabase->store("ENVELOPEEDITORSCALE", 256);
 
@@ -123,7 +123,7 @@ void Tracker::buildDefaultSettings()
 #ifdef __LOWRES__
 	settingsDatabase->store("PATTERNFONT", PPFont::FONT_TINY);
 #else
-	settingsDatabase->store("PATTERNFONT", PPFont::FONT_SYSTEM);
+	settingsDatabase->store("PATTERNFONT", PPFont::FONT_LARGE);
 #endif
 
 	// Scopes?
@@ -175,7 +175,7 @@ void Tracker::buildDefaultSettings()
 	// Hexadecimal offsets in the sample editor by default
 	settingsDatabase->store("SAMPLEEDITORDECIMALOFFSETS", 0);
 	// use internal disk browser?
-	settingsDatabase->store("INTERNALDISKBROWSER", 0);
+	settingsDatabase->store("INTERNALDISKBROWSER", 1);
 	// disk browser settings
 	settingsDatabase->store("INTERNALDISKBROWSERSETTINGS", SectionDiskMenu::getDefaultConfigUInt32());
 	settingsDatabase->store("INTERNALDISKBROWSERLASTPATH", "");
@@ -379,17 +379,22 @@ void Tracker::applySettingByKey(PPDictionaryKey* theKey, TMixerSettings& setting
 	}
 	else if (theKey->getKey().compareTo("CLASSIC") == 0)
 	{
-    // we keep this behind a setting for those who still want them
-    settingsDatabase->store("EDITMODE", EditModeFastTracker);  // not preferred by most new users (who don't know ft2)
-    settingsDatabase->store("INTERPOLATION", 1);               // fast-sinc runs fine on rpi zero in 2023
-    settingsDatabase->store("HDRECORDER_INTERPOLATION", 1);    
-    settingsDatabase->store("INSTRUMENTBACKTRACE", 1);          
-  	settingsDatabase->store("HIGHLIGHTMODULO2", 2);             
-   	settingsDatabase->store("ROWINSERTADD", 1);                 
-    settingsDatabase->store("VIRTUALCHANNELS", 0);              
-    settingsDatabase->store("MULTICHN_EDIT", 0); 
-    settingsDatabase->store("HEXCOUNT", 0);                  
-    settingsDatabase->store("SCREENSCALEFACTOR", 1);
+    // we keep the 2007 defaults behind a 'classic' setting for those who still want them
+		bool classic = (v2 != 0);
+    settingsDatabase->store("CLASSIC", classic ? 1 : 0 );
+    if( classic ){
+      settingsDatabase->store("EDITMODE", EditModeFastTracker);  // not preferred by most new users (who don't know ft2)
+      settingsDatabase->store("INTERPOLATION", 1);               // fast-sinc runs fine on rpi zero in 2023
+      settingsDatabase->store("HDRECORDER_INTERPOLATION", 1);    
+      settingsDatabase->store("INSTRUMENTBACKTRACE", 1);          
+      settingsDatabase->store("HIGHLIGHTMODULO2", 2);             
+      settingsDatabase->store("ROWINSERTADD", 1);                 
+      settingsDatabase->store("VIRTUALCHANNELS", 0);              
+      settingsDatabase->store("MULTICHN_EDIT", 0); 
+      settingsDatabase->store("HEXCOUNT", 0);                  
+      settingsDatabase->store("PATTERNFONT", PPFont::FONT_SYSTEM);
+      settingsDatabase->store("INTERNALDISKBROWSER", 0);
+    }
   }  
 	else if (theKey->getKey().compareTo("ENVELOPEEDITORSCALE") == 0)
 	{

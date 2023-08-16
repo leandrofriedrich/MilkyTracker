@@ -39,7 +39,7 @@ PPButton::PPButton(pp_int32 id, PPScreen* parentScreen, EventListenerInterface* 
 	clickable(clickable),
 	update(update),
 	verticalText(false),
-	flat(false),
+	flat(true),
 	autoSizeFont(true),
 	offset(0,0),
 	invertShading(false),
@@ -59,6 +59,8 @@ void PPButton::paint(PPGraphicsAbstract* g)
 {
 	if (!isVisible())
 		return;
+
+  setFlat( parentScreen != NULL && parentScreen->isClassic() ? false : true);
 
 	PPPoint location = this->location;
 
@@ -254,7 +256,8 @@ void PPButton::setText(const PPString& text)
 { 
 	bool lastCharIsPeriod = text.length() ? (text[text.length()-1] == '.') : false;
 	
-	this->text = text; 
+	this->text = text;
+  if( parentScreen == NULL || !parentScreen->isClassic() ) this->text.toLower();
 	
 	// Fall back to tiny font if string doesn't fit with current font
 	if (autoSizeFont &&

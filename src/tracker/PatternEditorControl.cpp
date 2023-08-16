@@ -35,6 +35,7 @@
 #include "PPUIConfig.h"
 
 #include "TrackerConfig.h"
+#include "ControlIDs.h"
 
 #define SCROLLBARWIDTH  SCROLLBUTTONSIZE
 
@@ -96,34 +97,64 @@ PatternEditorControl::PatternEditorControl(pp_int32 id, PPScreen* parentScreen, 
 
 	// context menu
 	editMenuControl = new PPContextMenu(4, parentScreen, this, PPPoint(0,0), TrackerConfig::colorThemeMain, false, PPFont::getFont(PPFont::FONT_SYSTEM));
-	
-	editMenuControl->addEntry("Mute channel", MenuCommandIDMuteChannel);
-	editMenuControl->addEntry("Solo channel", MenuCommandIDSoloChannel);
-	editMenuControl->addEntry("Unmute all", MenuCommandIDUnmuteAll);
-	editMenuControl->addEntry("\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4", -1);
-	editMenuControl->addEntry("Mark channel", MenuCommandIDSelectChannel);
-	editMenuControl->addEntry("Mark all", MenuCommandIDSelectAll);
-	editMenuControl->addEntry("\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4", -1);
-	editMenuControl->addEntry("Undo", MenuCommandIDUndo);
-	editMenuControl->addEntry("Redo", MenuCommandIDRedo);
-	editMenuControl->addEntry("\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4", -1);
-	editMenuControl->addEntry("Cut", MenuCommandIDCut);
-	editMenuControl->addEntry("Copy", MenuCommandIDCopy);
-	editMenuControl->addEntry("Paste", MenuCommandIDPaste);
-	editMenuControl->addEntry("Porous Paste", MenuCommandIDPorousPaste);
-	editMenuControl->addEntry("\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4", -1);
-	editMenuControl->addEntry("Swap channels", MenuCommandIDSwapChannels);
 
-	editMenuControl->setNotifyParentOnHide(true);
+  if( !parentScreen->isClassic() ){
+
+    fileMenuControl = new PPContextMenu(4, parentScreen, this, PPPoint(0,0), TrackerConfig::colorThemeMain);
+    fileMenuControl->setSubMenu(true);
+
+    editMenuControl->addEntry("File        >", 0xFFFF, fileMenuControl);
+
+    channelMenuControl = new PPContextMenu(4, parentScreen, this, PPPoint(0,0), TrackerConfig::colorThemeMain);
+    channelMenuControl->setSubMenu(true);
+    channelMenuControl->addEntry("Mute Channel", MenuCommandIDMuteChannel);
+    channelMenuControl->addEntry("Solo Channel", MenuCommandIDSoloChannel);
+    channelMenuControl->addEntry("Unmute all", MenuCommandIDUnmuteAll);
+    channelMenuControl->addEntry("\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4", -1);
+    channelMenuControl->addEntry("Mark channel", MenuCommandIDSelectChannel);
+    channelMenuControl->addEntry("Mark all", MenuCommandIDSelectAll);
+    channelMenuControl->addEntry("Swap channels", MenuCommandIDSwapChannels);
+    channelMenuControl->addEntry("\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4", -1);
+    channelMenuControl->addEntry("Add", MenuCommandIDChannelAdd);
+    channelMenuControl->addEntry("Delete", MenuCommandIDChannelDelete);
+    editMenuControl->addEntry("Channel     >", 0xFFFF, channelMenuControl);
+
+    editMenuControl->addEntry("\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4", -1);
+    editMenuControl->addEntry("Undo", MenuCommandIDUndo);
+    editMenuControl->addEntry("Redo", MenuCommandIDRedo);
+    editMenuControl->addEntry("\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4", -1);
+    editMenuControl->addEntry("Cut", MenuCommandIDCut);
+    editMenuControl->addEntry("Copy", MenuCommandIDCopy);
+    editMenuControl->addEntry("Paste", MenuCommandIDPaste);
+    editMenuControl->addEntry("Paste Porous", MenuCommandIDPorousPaste);
+
+  }else{
+    editMenuControl->addEntry("Mute channel", MenuCommandIDMuteChannel);
+    editMenuControl->addEntry("Solo channel", MenuCommandIDSoloChannel);
+    editMenuControl->addEntry("Unmute all", MenuCommandIDUnmuteAll);
+    editMenuControl->addEntry("\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4", -1);
+    editMenuControl->addEntry("Mark channel", MenuCommandIDSelectChannel);
+    editMenuControl->addEntry("Mark all", MenuCommandIDSelectAll);
+    editMenuControl->addEntry("\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4", -1);
+    editMenuControl->addEntry("Undo", MenuCommandIDUndo);
+    editMenuControl->addEntry("Redo", MenuCommandIDRedo);
+    editMenuControl->addEntry("\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4", -1);
+    editMenuControl->addEntry("Cut", MenuCommandIDCut);
+    editMenuControl->addEntry("Copy", MenuCommandIDCopy);
+    editMenuControl->addEntry("Paste", MenuCommandIDPaste);
+    editMenuControl->addEntry("Porous Paste", MenuCommandIDPorousPaste);
+    editMenuControl->addEntry("\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4", -1);
+    editMenuControl->addEntry("Swap channels", MenuCommandIDSwapChannels);
+  }
+
+	//editMenuControl->setNotifyParentOnHide(true);
 
 	initKeyBindings();
 	
 #ifdef __LOWRES__
 	setFont(PPFont::getFont(PPFont::FONT_TINY));
-	switchEditMode(EditModeMilkyTracker);
 #else
 	setFont(PPFont::getFont(PPFont::FONT_SYSTEM));
-	switchEditMode(EditModeFastTracker);
 #endif
 		
 	setRecordMode(false);
@@ -158,10 +189,9 @@ void PatternEditorControl::setFont(PPFont* font)
 	
 	adjustExtents();
 	
-	if (editMenuControl->getSize().width < slotSize)
-		editMenuControl->setFont(font);
-	else
-		editMenuControl->setFont(PPFont::getFont(PPFont::FONT_SYSTEM));
+  editMenuControl->setFont(font);
+  fileMenuControl->setFont(font);
+  channelMenuControl->setFont(font);
 
 	assureCursorVisible();
 }
@@ -1435,6 +1465,15 @@ void PatternEditorControl::executeMenuCommand(pp_int32 commandId)
 			
 		case MenuCommandIDSwapChannels:
 			patternEditor->swapChannels(patternEditor->getCursor().channel, menuInvokeChannel);
+			break;
+
+		case MenuCommandIDChannelAdd:{
+      patternEditor->triggerButton(BUTTON_MENU_ITEM_ADDCHANNELS, parentScreen, eventListener);
+			break;
+    }
+
+		case MenuCommandIDChannelDelete:
+      patternEditor->triggerButton(BUTTON_MENU_ITEM_SUBCHANNELS, parentScreen, eventListener);
 			break;
 	}
 	

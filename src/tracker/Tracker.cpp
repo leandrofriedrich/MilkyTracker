@@ -571,6 +571,7 @@ pp_int32 Tracker::handleEvent(PPObject* sender, PPEvent* event)
 	else if (event->getID() == eCommand || event->getID() == eCommandRepeat)
 	{
 
+printf("event:%i %i\n",event->getID(), BUTTON_MENU_ITEM_ADDCHANNELS);
 		switch (reinterpret_cast<PPControl*>(sender)->getID())
 		{
 			// test
