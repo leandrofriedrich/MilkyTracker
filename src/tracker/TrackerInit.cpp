@@ -549,10 +549,13 @@ void Tracker::initSectionOrderlist(pp_int32 x, pp_int32 y)
 ////////////////////////////////////////////////////////////////////
 void Tracker::initSectionSpeed(pp_int32 x, pp_int32 y)
 {
+	bool isClassic = settingsDatabase->restore("CLASSIC")->getIntValue() == 1;
+
 	PPContainer* containerSpeed = new PPContainer(CONTAINER_SPEED, screen, this, PPPoint(x, y), PPSize(99-2,40), false);
 	containerSpeed->setColor(TrackerConfig::colorThemeMain);
 
 	PPStaticText* staticText = new PPStaticText(STATICTEXT_SPEED_BPM_DESC, NULL, NULL, PPPoint(x+2, y+2+2), "BPM", true);
+	if( !isClassic ) staticText->setFont(PPFont::getFont(PPFont::FONT_TINY));
 	containerSpeed->addControl(staticText);	
 
 	// actual BPM field
@@ -569,14 +572,16 @@ void Tracker::initSectionSpeed(pp_int32 x, pp_int32 y)
 	staticText->hide(true);
 	containerSpeed->addControl(staticText);	
 
-	staticText = new PPStaticText(STATICTEXT_SPEED_SPEED_DESC, NULL, NULL, PPPoint(x+2, y+2 + 2 + 12), "Spd", true);
+	staticText = new PPStaticText(STATICTEXT_SPEED_SPEED_DESC, NULL, NULL, PPPoint(x+2, y+2 + 2 + 12), isClassic ? "Spd" : "Speed", true);
+	if( !isClassic ) staticText->setFont(PPFont::getFont(PPFont::FONT_TINY));
 	containerSpeed->addControl(staticText);	
 
 	// actual speed field
 	staticText = new PPStaticText(STATICTEXT_SPEED_SPEED, screen, NULL, PPPoint(x+2 + 5*8 - 5, y+2 + 2 + 12), "", false);
 	containerSpeed->addControl(staticText);	
 
-	staticText = new PPStaticText(STATICTEXT_SPEED_PATTERNADD_DESC, NULL, NULL, PPPoint(x+2, y+2 + 2 + 12 + 12), "Add", true);
+	staticText = new PPStaticText(STATICTEXT_SPEED_PATTERNADD_DESC, NULL, NULL, PPPoint(x+2, y+2 + 2 + 12 + 12), isClassic ? "Add" : "Step", true);
+	if( !isClassic ) staticText->setFont(PPFont::getFont(PPFont::FONT_TINY));
 	containerSpeed->addControl(staticText);	
 
 	// actual speed field
@@ -648,14 +653,18 @@ void Tracker::initSectionPattern(pp_int32 x, pp_int32 y)
 	PPContainer* containerPattern = new PPContainer(CONTAINER_PATTERN, screen, this, PPPoint(x, y), PPSize(91+14+4,40), false);
 	containerPattern->setColor(TrackerConfig::colorThemeMain);
 
-	PPStaticText* staticText = new PPStaticText(0, NULL, NULL, PPPoint(x + 2, y+2 + 2), "Patn.", true);
+
+	bool isClassic = settingsDatabase->restore("CLASSIC")->getIntValue() == 1;
+	PPStaticText* staticText = new PPStaticText(0, NULL, NULL, PPPoint(x + 2, y+2 + 2), isClassic ? "Patn." : "Pattern", true);
+  if( !isClassic  ) staticText->setFont(PPFont::getFont(PPFont::FONT_TINY));
 	containerPattern->addControl(staticText);	
 
 	// actual pattern index field
 	staticText = new PPStaticText(STATICTEXT_PATTERN_INDEX, screen, NULL, PPPoint(x + 2 + 4 * 8 + 18, y+2 + 2), "", false);
 	containerPattern->addControl(staticText);	
 
-	staticText = new PPStaticText(0, NULL, NULL, PPPoint(x + 2, y+2 + 2 + 12), "Len.", true);
+	staticText = new PPStaticText(0, NULL, NULL, PPPoint(x + 2, y+2 + 2 + 12), isClassic ? "Len." : "Length", true);
+  if( !isClassic  ) staticText->setFont(PPFont::getFont(PPFont::FONT_TINY));
 	containerPattern->addControl(staticText);	
 
 	// actual pattern length field
@@ -682,15 +691,28 @@ void Tracker::initSectionPattern(pp_int32 x, pp_int32 y)
 
 	containerPattern->addControl(button);
 
-	button = new PPButton(BUTTON_PATTERN_EXPAND, screen, this, PPPoint(x + 3, y+2 + 12 + 12), PPSize(51, 11));
-	button->setText("Expand");
+  if( isClassic ){
+    button = new PPButton(BUTTON_PATTERN_EXPAND, screen, this, PPPoint(x + 3, y+2 + 12 + 12), PPSize(16, 11));
+    button->setText("Expand");
 
-	containerPattern->addControl(button);
+    containerPattern->addControl(button);
 
-	button = new PPButton(BUTTON_PATTERN_SHRINK, screen, this, PPPoint(x + 3 + 52, y+2 + 12 +12), PPSize(51, 11));
-	button->setText("Shrink");
+    button = new PPButton(BUTTON_PATTERN_SHRINK, screen, this, PPPoint(x + 3 + 52, y+2 + 12 +12), PPSize(16, 11));
+    button->setText("Shrink");
 
-	containerPattern->addControl(button);
+    containerPattern->addControl(button);
+  }else{
+
+    button = new PPButton(BUTTON_PATTERN_EXPAND, screen, this, PPPoint(x + 2 + 52+18, y+2 + 12 + 12), PPSize(16, 11));
+    button->setText("*");
+
+    containerPattern->addControl(button);
+
+    button = new PPButton(BUTTON_PATTERN_SHRINK, screen, this, PPPoint(x + 2 + 52 + 17+18, y+2 + 12 +12), PPSize(16, 11));
+    button->setText("/");
+
+    containerPattern->addControl(button);
+  }
 
 	screen->addControl(containerPattern);
 }

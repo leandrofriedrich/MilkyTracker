@@ -103,6 +103,20 @@ PatternEditorControl::PatternEditorControl(pp_int32 id, PPScreen* parentScreen, 
     fileMenuControl = new PPContextMenu(4, parentScreen, this, PPPoint(0,0), TrackerConfig::colorThemeMain);
     fileMenuControl->setSubMenu(true);
 
+    /*
+     * todo: 
+     * 
+     * Module      > 
+     *               Save
+     *               Optimize
+     * Instruments > Editor 
+     *             > Copy between modules
+     * Samples     > Editor 
+     *             > Copy between modules
+     * Pattern     > Transpose
+     * Config 
+     */
+
     editMenuControl->addEntry("File        >", 0xFFFF, fileMenuControl);
 
     channelMenuControl = new PPContextMenu(4, parentScreen, this, PPPoint(0,0), TrackerConfig::colorThemeMain);
