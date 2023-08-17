@@ -188,7 +188,7 @@ void Tracker::buildDefaultSettings()
 	// show splash screen?
 	settingsDatabase->store("SHOWSPLASH", 1);
 	// orderlist is extended
-	settingsDatabase->store("EXTENDEDORDERLIST", 0);
+	settingsDatabase->store("EXTENDEDORDERLIST", 1);
 	// current row add
 	settingsDatabase->store("ROWINSERTADD", 0);
 	// show title field
@@ -394,6 +394,7 @@ void Tracker::applySettingByKey(PPDictionaryKey* theKey, TMixerSettings& setting
       settingsDatabase->store("HEXCOUNT", 0);                  
       settingsDatabase->store("PATTERNFONT", PPFont::FONT_SYSTEM);
       settingsDatabase->store("INTERNALDISKBROWSER", 0);
+	  settingsDatabase->store("EXTENDEDORDERLIST", 0);
     }
   }  
 	else if (theKey->getKey().compareTo("ENVELOPEEDITORSCALE") == 0)

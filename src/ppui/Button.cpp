@@ -49,6 +49,11 @@ PPButton::PPButton(pp_int32 id, PPScreen* parentScreen, EventListenerInterface* 
 	pressed = false;
 	
 	font = PPFont::getFont(PPFont::FONT_SYSTEM);
+    if(parentScreen != NULL && !parentScreen->isClassic() ){
+		setFlat(true);
+		font = PPFont::getFont(PPFont::FONT_TINY);
+	}
+
 }
 
 PPButton::~PPButton()
@@ -59,8 +64,6 @@ void PPButton::paint(PPGraphicsAbstract* g)
 {
 	if (!isVisible())
 		return;
-
-  setFlat( parentScreen != NULL && parentScreen->isClassic() ? false : true);
 
 	PPPoint location = this->location;
 

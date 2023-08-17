@@ -26,6 +26,7 @@
 #include "Font.h"
 #include "Tools.h"
 #include "PPUIConfig.h"
+#include "Screen.h"
 
 PPStaticText::PPStaticText(pp_int32 id,	PPScreen* parentScreen, EventListenerInterface* eventListener, 
 						   const PPPoint& location, 
@@ -43,6 +44,9 @@ PPStaticText::PPStaticText(pp_int32 id,	PPScreen* parentScreen, EventListenerInt
 	extent(-1, -1)
 {
 	font = PPFont::getFont(PPFont::FONT_SYSTEM);		
+    if(parentScreen != NULL && !parentScreen->isClassic() ){
+		font = PPFont::getFont(PPFont::FONT_TINY);
+	}
 
 	calcExtent();
 }

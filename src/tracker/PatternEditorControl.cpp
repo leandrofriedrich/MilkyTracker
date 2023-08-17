@@ -100,8 +100,15 @@ PatternEditorControl::PatternEditorControl(pp_int32 id, PPScreen* parentScreen, 
 
   if( !parentScreen->isClassic() ){
 
-    fileMenuControl = new PPContextMenu(4, parentScreen, this, PPPoint(0,0), TrackerConfig::colorThemeMain);
-    fileMenuControl->setSubMenu(true);
+    moduleMenuControl = new PPContextMenu(4, parentScreen, this, PPPoint(0,0), TrackerConfig::colorThemeMain);
+    moduleMenuControl->setSubMenu(true);
+    moduleMenuControl->addEntry("Load", MAINMENU_LOAD);
+    moduleMenuControl->addEntry("Save", MAINMENU_SAVE);
+    moduleMenuControl->addEntry("Save as", MAINMENU_SAVEAS);
+
+    
+	instrumentMenuControl = new PPContextMenu(4, parentScreen, this, PPPoint(0,0), TrackerConfig::colorThemeMain);
+    instrumentMenuControl->setSubMenu(true);
 
     /*
      * todo: 
@@ -117,7 +124,8 @@ PatternEditorControl::PatternEditorControl(pp_int32 id, PPScreen* parentScreen, 
      * Config 
      */
 
-    editMenuControl->addEntry("File        >", 0xFFFF, fileMenuControl);
+    editMenuControl->addEntry("Song       >", 0xFFFF, moduleMenuControl);
+    editMenuControl->addEntry("Instrument >", 0xFFFF, instrumentMenuControl);
 
     channelMenuControl = new PPContextMenu(4, parentScreen, this, PPPoint(0,0), TrackerConfig::colorThemeMain);
     channelMenuControl->setSubMenu(true);
@@ -131,7 +139,10 @@ PatternEditorControl::PatternEditorControl(pp_int32 id, PPScreen* parentScreen, 
     channelMenuControl->addEntry("\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4", -1);
     channelMenuControl->addEntry("Add", MenuCommandIDChannelAdd);
     channelMenuControl->addEntry("Delete", MenuCommandIDChannelDelete);
-    editMenuControl->addEntry("Channel     >", 0xFFFF, channelMenuControl);
+    editMenuControl->addEntry("Channel    >", 0xFFFF, channelMenuControl);
+    
+	editMenuControl->addEntry("Files", MenuCommandIDModuleLoad);
+    editMenuControl->addEntry("Config", MAINMENU_CONFIG);
 
     editMenuControl->addEntry("\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4\xc4", -1);
     editMenuControl->addEntry("Undo", MenuCommandIDUndo);
@@ -168,7 +179,9 @@ PatternEditorControl::PatternEditorControl(pp_int32 id, PPScreen* parentScreen, 
 #ifdef __LOWRES__
 	setFont(PPFont::getFont(PPFont::FONT_TINY));
 #else
-	setFont(PPFont::getFont(PPFont::FONT_SYSTEM));
+	if( parentScreen->isClassic() ){
+		setFont(PPFont::getFont(PPFont::FONT_SYSTEM));
+	}else setFont(PPFont::getFont(PPFont::FONT_TINY));
 #endif
 		
 	setRecordMode(false);
@@ -203,9 +216,10 @@ void PatternEditorControl::setFont(PPFont* font)
 	
 	adjustExtents();
 	
-  editMenuControl->setFont(font);
-  fileMenuControl->setFont(font);
-  channelMenuControl->setFont(font);
+    editMenuControl->setFont(font);
+    moduleMenuControl->setFont(font);
+    instrumentMenuControl->setFont(font);
+    channelMenuControl->setFont(font);
 
 	assureCursorVisible();
 }
@@ -1482,13 +1496,23 @@ void PatternEditorControl::executeMenuCommand(pp_int32 commandId)
 			break;
 
 		case MenuCommandIDChannelAdd:{
-      patternEditor->triggerButton(BUTTON_MENU_ITEM_ADDCHANNELS, parentScreen, eventListener);
-			break;
-    }
+			 patternEditor->triggerButton(BUTTON_MENU_ITEM_ADDCHANNELS, parentScreen, eventListener);
+			 break;
+		 }
 
-		case MenuCommandIDChannelDelete:
-      patternEditor->triggerButton(BUTTON_MENU_ITEM_SUBCHANNELS, parentScreen, eventListener);
-			break;
+		case MenuCommandIDChannelDelete:{
+			 patternEditor->triggerButton(BUTTON_MENU_ITEM_SUBCHANNELS, parentScreen, eventListener);
+			 break;
+		}
+		
+		case MAINMENU_LOAD:
+		case MAINMENU_SAVE:
+		case MAINMENU_SAVEAS:
+		case MAINMENU_CONFIG:
+		{
+			 patternEditor->triggerButton(commandId, parentScreen, eventListener);
+			 break;
+		}
 	}
 	
 	// Hack:

@@ -48,6 +48,8 @@ PPContextMenu::PPContextMenu(pp_int32 id, PPScreen* parentScreen, EventListenerI
 	menu = new PPMenu(font, *selectionColor, *color);
 	menu->setTextBrightColor(PPUIConfig::getInstance()->getColor(PPUIConfig::ColorMenuTextBright));
 	menu->setTextDarkColor(PPUIConfig::getInstance()->getColor(PPUIConfig::ColorMenuTextDark));
+	printf("ppcontext\n");
+	printf("selectionColor = %i %i %i\n",selectionColor->r,selectionColor->g,selectionColor->b);
 }
 
 PPContextMenu::~PPContextMenu()

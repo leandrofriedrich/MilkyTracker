@@ -184,7 +184,8 @@ private:
 	pp_int32 lastMenuInvokeChannel;
 
 	PPContextMenu* editMenuControl;
-	PPContextMenu* fileMenuControl;
+	PPContextMenu* moduleMenuControl;
+	PPContextMenu* instrumentMenuControl;
 	PPContextMenu* channelMenuControl;
 
 	// Keyboard shortcuts
@@ -378,7 +379,11 @@ private:
 		MenuCommandIDPorousPaste,
 		MenuCommandIDSwapChannels,
 		MenuCommandIDChannelAdd,
-		MenuCommandIDChannelDelete
+		MenuCommandIDChannelDelete,
+		MenuCommandIDModuleLoad,
+		MenuCommandIDModuleSave,
+		MenuCommandIDModuleSaveAs
+
 	};
 	
 	void invokeMenu(pp_int32 channel, const PPPoint& p);
