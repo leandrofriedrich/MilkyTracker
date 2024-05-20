@@ -92,15 +92,7 @@ class PPKeyBindings;
 class Tracker : public EventListenerInterface
 {
 private:
-	enum PanelRotate
-	{
-		PanelTop,
-		PanelTop_Sample,
-		PanelTop_Instrument
-	};
-	PanelRotate panelrotate = PanelRotate::PanelTop;
 
-	// I've replaced some constants
 #ifndef __LOWRES__
 	pp_int32 SCOPESHEIGHT();
 	pp_int32 CURRENTSCOPESHEIGHT();

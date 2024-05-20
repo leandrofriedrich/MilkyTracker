@@ -209,6 +209,8 @@ void PPDisplayDeviceFB::close()
 	currentGraphics->lock = true;
 }
 
+SDL_Rect mouse;
+
 void PPDisplayDeviceFB::update()
 {
 	if (!isUpdateAllowed() || !isEnabled())
@@ -219,12 +221,14 @@ void PPDisplayDeviceFB::update()
 		return;
 	}
 	
-	PPRect r(0, 0, getSize().width, getSize().height);
-	swap(r);
+	SDL_UpdateTexture(theTexture, NULL, theSurface->pixels, theSurface->pitch);
 	
 	// Update entire texture and copy to renderer
-	SDL_UpdateTexture(theTexture, NULL, theSurface->pixels, theSurface->pitch);
-	SDL_RenderClear(theRenderer);
+	SDL_SetRenderDrawColor(theRenderer, 255, 255, 255, 255);
+	SDL_GetGlobalMouseState(&mouse.x, &mouse.y);
+	SDL_RenderDrawLine(theRenderer, mouse.x, mouse.y, mouse.x+20, mouse.y+20);
+	SDL_RenderDrawLine(theRenderer, mouse.x, mouse.y, mouse.x+10, mouse.y);
+	SDL_RenderDrawLine(theRenderer, mouse.x, mouse.y, mouse.x, mouse.y+10);
 	SDL_RenderCopy(theRenderer, theTexture, NULL, NULL);
 	SDL_RenderPresent(theRenderer);
 }
@@ -239,23 +243,23 @@ void PPDisplayDeviceFB::update(const PPRect& r)
 		return;
 	}
 
-	swap(r);
-	
-	PPRect r2(r);
-	r2.scale(scaleFactor);
-	
-	transformInverse(r2);
-
-	SDL_Rect r3 = { r2.x1, r2.y1, r2.width(), r2.height() };
+	SDL_Rect r3 = { r.x1, r.y1, r.width(), r.height() };
 	
 	// Calculate destination pixel data offset based on row pitch and x coordinate
-	void* surfaceOffset = (char*) theSurface->pixels + r2.y1 * theSurface->pitch + r2.x1 * theSurface->format->BytesPerPixel;
+	void* surfaceOffset = (char*) theSurface->pixels + r.y1 * theSurface->pitch + r.x1 * theSurface->format->BytesPerPixel;
 	
 	// Update dirty area of texture and copy to renderer
 	SDL_UpdateTexture(theTexture, &r3, surfaceOffset, theSurface->pitch);
-	SDL_RenderClear(theRenderer);
+
 	SDL_RenderCopy(theRenderer, theTexture, NULL, NULL);
+	SDL_GetGlobalMouseState(&mouse.x, &mouse.y);
+	SDL_SetRenderDrawColor(theRenderer, 255, 255, 255, 255);
+	SDL_RenderDrawLine(theRenderer, mouse.x, mouse.y, mouse.x+20, mouse.y+20);
+	SDL_RenderDrawLine(theRenderer, mouse.x, mouse.y, mouse.x+10, mouse.y);
+	SDL_RenderDrawLine(theRenderer, mouse.x, mouse.y, mouse.x, mouse.y+10);
 	SDL_RenderPresent(theRenderer);
+	
+	
 }
 
 void PPDisplayDeviceFB::swap(const PPRect& r2)

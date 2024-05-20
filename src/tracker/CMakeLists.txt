@@ -375,4 +375,7 @@ else()
     set(INSTALL_DEST ${CMAKE_INSTALL_BINDIR})
 endif()
 
+wut_create_rpx(tracker)
+
 install(TARGETS tracker DESTINATION ${INSTALL_DEST})
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/milkytracker.rpx" DESTINATION ${INSTALL_DEST})

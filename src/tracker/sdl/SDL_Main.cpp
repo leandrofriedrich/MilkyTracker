@@ -66,6 +66,13 @@
 #include <sys/types.h>
 #include <limits.h>
 #include <errno.h>
+#include <coreinit/screen.h>
+#include <coreinit/cache.h>
+#include <whb/log_cafe.h>
+#include <whb/log_udp.h>
+#include <whb/log.h>
+#include <whb/proc.h>
+#include <coreinit/debug.h>
 
 #include <SDL.h>
 #include "SDL_KeyTranslation.h"
@@ -78,6 +85,7 @@
 #include "PPMutex.h"
 #include "PPSystem_POSIX.h"
 #include "PPPath_POSIX.h"
+
 
 #ifdef HAVE_LIBRTMIDI
 #include "../midi/posix/MidiReceiver_pthread.h"
@@ -276,7 +284,7 @@ void StartMidiRecording(unsigned int devID)
 	if (!myMidiReceiver->startRecording(devID))
 	{
 		// Deal with error
-		fprintf(stderr, "Failed to initialise ALSA MIDI support.\n");
+		WHBLogPrintf("Failed to initialise ALSA MIDI support.");
 	}
 }
 
@@ -285,8 +293,8 @@ void InitMidi()
 	unsigned int portId = 0;
 	if(const char* port = std::getenv("MIDI_IN")) portId = atoi(port);
 	StartMidiRecording(portId);
-	printf("MIDI: selecting MIDI-in port: %i\n",portId);
-	printf("MIDI: run `MIDI_IN=x ./milkytracker` to select different port)\n", portId);
+	WHBLogPrintf("MIDI: selecting MIDI-in port: %i",portId);
+	WHBLogPrintf("MIDI: run `MIDI_IN=x ./milkytracker` to select different port)", portId);
 }
 #endif
 
@@ -584,7 +592,7 @@ void preTranslateKey(SDL_Keysym& keysym)
 void translateTextInputEvent(const SDL_Event& event)
 {
 #ifdef DEBUG
-	printf ("DEBUG: Text input: %s\n", event.text.text);
+	WHBLogPrintf("DEBUG: Text input: %s\n", event.text.text);
 #endif
 
 	char character = event.text.text[0];
@@ -612,7 +620,7 @@ void translateKeyDownEvent(const SDL_Event& event)
 	preTranslateKey(keysym);
 
 #ifdef DEBUG
-	printf ("DEBUG: Key pressed: VK: %d, SC: %d, Scancode: %d\n", toVK(keysym), toSC(keysym), keysym.sym);
+	WHBLogPrintf("DEBUG: Key pressed: VK: %d, SC: %d, Scancode: %d\n", toVK(keysym), toSC(keysym), keysym.sym);
 #endif
 
 	pp_uint16 chr[3] = {toVK(keysym), toSC(keysym), static_cast<pp_uint16> (keysym.sym)};
@@ -620,6 +628,89 @@ void translateKeyDownEvent(const SDL_Event& event)
 	PPEvent myEvent(eKeyDown, &chr, sizeof(chr));
 	RaiseEventSerialized(&myEvent);
 }
+
+int xDir = 320;
+int yDir = 210;
+
+void wiiuMouseAxis(int axis, int value)
+{
+	switch(axis){
+		case 0:
+			xDir = xDir + (value/1000);
+			break;
+		case 1:
+			yDir = yDir + (value/1000);
+			break;
+	}
+	
+	SDL_WarpMouseInWindow(myDisplayDevice->getWindow(),xDir, yDir);
+	myDisplayDevice->update(PPRect(xDir, yDir, xDir+20, yDir+20));
+}
+
+void wiiuMouseButton(int button, int down)
+{
+	switch (button){
+		case 0:
+		case 1:
+		case 2:
+		case 3:
+			myDisplayDevice->update();
+			break;
+			
+		case 5:
+			xDir = xDir + 13;
+			SDL_WarpMouseInWindow(myDisplayDevice->getWindow(),xDir, yDir);
+			break;
+			
+		case 7:
+			xDir = xDir - 13;
+			SDL_WarpMouseInWindow(myDisplayDevice->getWindow(),xDir, yDir);
+			break;
+			
+		case 6:
+			yDir = yDir + 13;
+			SDL_WarpMouseInWindow(myDisplayDevice->getWindow(),xDir, yDir);
+			break;
+			
+		case 4:
+			yDir = yDir - 13;
+			SDL_WarpMouseInWindow(myDisplayDevice->getWindow(),xDir, yDir);
+			break;
+			
+		case 14:
+			if(down)
+				translateMouseDownEvent(1, xDir, yDir);
+			else
+				translateMouseUpEvent(1, xDir, yDir);
+			break;
+			
+		case 13:
+			if(down)
+				translateMouseDownEvent(3, xDir, yDir);
+			else
+				translateMouseUpEvent(3, xDir, yDir);
+			break;
+		
+		case 15:
+			{
+			pp_uint16 chr2[3] = {0x4C, 0, 0};
+			PPEvent event3(eKeyDown, &chr2, sizeof(chr2));
+			RaiseEventSerialized(&event3);
+			}
+			break;
+			
+		case 12:
+		{
+			pp_uint16 chr[3] = {VK_RETURN, 0, 0};
+			PPEvent event(eKeyDown, &chr, sizeof(chr));
+			RaiseEventSerialized(&event);
+		}
+			break;
+			
+	}
+	myDisplayDevice->update();
+}
+
 
 void translateKeyUpEvent(const SDL_Event& event)
 {
@@ -636,9 +727,35 @@ void translateKeyUpEvent(const SDL_Event& event)
 void processSDLEvents(const SDL_Event& event)
 {
 	pp_uint32 mouseButton = 0;
-
+	//scr_printf("sdl event");
 	switch (event.type)
 	{
+		case SDL_JOYAXISMOTION:
+			wiiuMouseAxis(event.jaxis.axis, event.jaxis.value);
+			break;
+
+		case SDL_JOYBUTTONDOWN:
+			wiiuMouseButton(event.jbutton.button, 1);
+			break;
+
+		case SDL_JOYBUTTONUP:
+			wiiuMouseButton(event.jbutton.button, 0);
+			break;
+			
+		case SDL_FINGERUP:
+			mouseButton = 1;
+			translateMouseUpEvent(mouseButton, event.tfinger.x*854, event.tfinger.y*480);
+			break;
+
+		case SDL_FINGERDOWN:
+			mouseButton = 1;
+			translateMouseDownEvent(mouseButton, event.tfinger.x*854, event.tfinger.y*480);
+			break;
+
+		case SDL_FINGERMOTION:
+			translateMouseMoveEvent(1, event.tfinger.x*854, event.tfinger.y*480);
+			break;
+			
 		case SDL_MOUSEBUTTONDOWN:
 			mouseButton = event.button.button;
 			translateMouseDownEvent(mouseButton, event.button.x, event.button.y);
@@ -748,27 +865,27 @@ void crashHandler(int signum)
 
 	if (signum == 15)
 	{
-		fprintf(stderr, "\nTERM signal received.\n");
+		WHBLogPrintf("TERM signal received.");
 		SDL_Quit();
 		return;
 	}
 	else
 	{
-		fprintf(stderr, "\nCrashed with signal %i\n"
+		WHBLogPrintf("Crashed with signal %i"
 				"Please submit a bug report stating exactly what you were doing "
 				"at the time of the crash, as well as the above signal number. "
-				"Also note if it is possible to reproduce this crash.\n", signum);
+				"Also note if it is possible to reproduce this crash.", signum);
 	}
 
 	if (num != 100)
 	{
 		if (myTracker->saveModule(buffer) == MP_DEVICE_ERROR)
 		{
-			fprintf(stderr, "\nUnable to save backup (read-only filesystem?)\n\n");
+			WHBLogPrintf("Unable to save backup (read-only filesystem?)");
 		}
 		else
 		{
-			fprintf(stderr, "\nA backup has been saved to %s\n\n", buffer);
+			WHBLogPrintf("A backup has been saved to %s", buffer);
 		}
 	}
 
@@ -780,10 +897,14 @@ void crashHandler(int signum)
 void initTracker(pp_uint32 bpp, PPDisplayDevice::Orientations orientation,
 				 bool swapRedBlue, bool noSplash)
 {
+	WHBLogCafeInit();
+	WHBLogUdpInit();
+	WHBLogPrintf("initTracker() start");
+
 	// Initialize SDL
-	if ( SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0 )
+	if ( SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER | SDL_INIT_EVENTS) < 0 )
 	{
-		fprintf(stderr, "Couldn't initialize SDL: %s\n",SDL_GetError());
+		WHBLogPrintf("Couldn't initialize SDL: %s\n",SDL_GetError());
 		exit(EXIT_FAILURE);
 	}
 
@@ -813,16 +934,16 @@ void initTracker(pp_uint32 bpp, PPDisplayDevice::Orientations orientation,
 	PPSize windowSize = myTracker->getWindowSizeFromDatabase();
 	bool fullScreen = myTracker->getFullScreenFlagFromDatabase();
 	pp_int32 scaleFactor = myTracker->getScreenScaleFactorFromDatabase();
-
-#ifdef __LOWRES__
-	windowSize.width = DISPLAYDEVICE_WIDTH;
-	windowSize.height = DISPLAYDEVICE_HEIGHT;
-#endif
+	
+	// HACK: Initialise screen size to Gamepad Resolution for touch to work correctly
+	windowSize.width = 854;
+	windowSize.height = 480;
 
 myDisplayDevice = new PPDisplayDeviceFB(windowSize.width, windowSize.height, scaleFactor,
 										bpp, fullScreen, orientation, swapRedBlue);
 
 	SDL_SetWindowTitle(myDisplayDevice->getWindow(), "Loading MilkyTracker...");
+	WHBLogPrintf("Loading MilkyTracker...");
 	myDisplayDevice->init();
 
 	myTrackerScreen = new PPScreen(myDisplayDevice, myTracker);
@@ -839,7 +960,7 @@ myDisplayDevice = new PPDisplayDeviceFB(windowSize.width, windowSize.height, sca
 	timer = SDL_AddTimer(20, timerCallback, NULL);
 
 	// Start capturing text input events
-	SDL_StartTextInput();
+	// SDL_StartTextInput();
 
 
 	// Kickstart SDL event loop last to prevent overflowing message-queue on lowmem systems 
@@ -847,6 +968,17 @@ myDisplayDevice = new PPDisplayDeviceFB(windowSize.width, windowSize.height, sca
 	SDL_PumpEvents();
 
 	ticking = true;
+	
+	if (SDL_NumJoysticks() < 1) {
+        WHBLogPrintf("No joysticks connected!\n");
+        return;
+    }
+    SDL_Joystick* joystick = SDL_JoystickOpen(0);
+	if (joystick == NULL) {
+        WHBLogPrintf("Unable to open joystick:");
+        return;
+    }
+	WHBLogPrintf("Opened joystick!");
 }
 
 static bool done;
@@ -871,11 +1003,12 @@ void exitSDLEventLoop(bool serializedEventInvoked/* = true*/)
 		done = 1;
 }
 
-void SendFile(char *file)
+size_t datasize;
+void SendFile(const char *file)
 {
 	PPSystemString finalFile(file);
 	PPSystemString* strPtr = &finalFile;
-
+	
 	PPEvent event(eFileDragDropped, &strPtr, sizeof(PPSystemString*));
 	RaiseEventSerialized(&event);
 }
@@ -887,77 +1020,13 @@ int main(int argc, char *argv[])
 #endif
 {
 	SDL_Event event;
-	char *loadFile = 0;
+	const char *loadFile = 0;
 	char loadFileAbsPath[PATH_MAX];
 
 	pp_int32 defaultBPP = -1;
 	PPDisplayDevice::Orientations orientation = PPDisplayDevice::ORIENTATION_NORMAL;
 	bool swapRedBlue = false, noSplash = false;
 	bool recVelocity = false;
-
-	// Parse command line
-	while ( argc > 1 )
-	{
-		--argc;
-
-#ifdef __APPLE__
-		// OSX: Swallow "-psn_xxx" argument passed by Finder on OSX <10.9
-		if ( strncmp(argv[argc], "-psn", 4) == 0 )
-		{
-			continue;
-		}
-		else
-#endif
-		if ( strcmp(argv[argc-1], "-bpp") == 0 )
-		{
-			defaultBPP = atoi(argv[argc]);
-			--argc;
-		}
-		else if ( strcmp(argv[argc], "-nosplash") == 0 )
-		{
-			noSplash = true;
-		}
-		else if ( strcmp(argv[argc], "-swap") == 0 )
-		{
-			swapRedBlue = true;
-		}
-		else if ( strcmp(argv[argc-1], "-orientation") == 0 )
-		{
-			if (strcmp(argv[argc], "NORMAL") == 0)
-			{
-				orientation = PPDisplayDevice::ORIENTATION_NORMAL;
-			}
-			else if (strcmp(argv[argc], "ROTATE90CCW") == 0)
-			{
-				orientation = PPDisplayDevice::ORIENTATION_ROTATE90CCW;
-			}
-			else if (strcmp(argv[argc], "ROTATE90CW") == 0)
-			{
-				orientation = PPDisplayDevice::ORIENTATION_ROTATE90CW;
-			}
-			else
-				goto unrecognizedCommandLineSwitch;
-			--argc;
-		}
-		else if ( strcmp(argv[argc], "-recvelocity") == 0)
-		{
-			recVelocity = true;
-		}
-		else
-		{
-unrecognizedCommandLineSwitch:
-			if (argv[argc][0] == '-')
-			{
-				fprintf(stderr,
-						"Usage: %s [-bpp N] [-swap] [-orientation NORMAL|ROTATE90CCW|ROTATE90CW] [-nosplash] [-recvelocity]\n", argv[0]);
-				exit(1);
-			}
-			else
-			{
-				loadFile = argv[argc];
-			}
-		}
-	}
 
 	globalMutex = new PPMutex();
 
@@ -975,28 +1044,19 @@ unrecognizedCommandLineSwitch:
 		myMidiReceiver->setRecordVelocity(true);
 	}
 #endif
-
+	
 	if (loadFile)
 	{
 		PPSystemString newCwd = path.getCurrent();
 		path.change(oldCwd);
-		
-		struct stat statBuf;
-
-		if (stat(realpath(loadFile, loadFileAbsPath), &statBuf) != 0)
-		{
-			fprintf(stderr, "could not open %s: %s\n", loadFile, strerror(errno));
-		}
-		else
-		{
-			SendFile(realpath(loadFile, loadFileAbsPath));
-			path.change(newCwd);
-			pp_uint16 chr[3] = {VK_RETURN, 0, 0};
-			PPEvent event(eKeyDown, &chr, sizeof(chr));
-			RaiseEventSerialized(&event);
-		}
+		SendFile(loadFile);
+		path.change(newCwd);
+		pp_uint16 chr[3] = {VK_RETURN, 0, 0};
+		PPEvent event(eKeyDown, &chr, sizeof(chr));
+		RaiseEventSerialized(&event);
 	}
 
+	
 	// Main event loop
 	done = 0;
 	while (!done && SDL_WaitEvent(&event))

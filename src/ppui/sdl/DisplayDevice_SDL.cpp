@@ -27,6 +27,7 @@ SDL_Window* PPDisplayDevice::CreateWindow(pp_int32& w, pp_int32& h, pp_int32& bp
 {
 	size_t namelen = 0;
 	char rendername[256] = { 0 };
+	/*
 	PFNGLGETSTRINGPROC glGetStringAPI = NULL;
   bool opengl_disable = getenv("NO_OPENGL") != NULL;
 
@@ -51,7 +52,8 @@ SDL_Window* PPDisplayDevice::CreateWindow(pp_int32& w, pp_int32& h, pp_int32& bp
 
 	// Create SDL window
 	SDL_Window* theWindow = SDL_CreateWindow("MilkyTracker", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, opengl_disable ? flags : SDL_WINDOW_OPENGL | flags);
-
+	*/
+	SDL_Window* theWindow = SDL_CreateWindow("MilkyTracker", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, SDL_WINDOW_SHOWN);
 	if (theWindow == NULL)
 	{
 		fprintf(stderr, "SDL: SDL_CreateWindow (width: %d, height: %d) failed: %s\n", w, h, SDL_GetError());
@@ -60,7 +62,7 @@ SDL_Window* PPDisplayDevice::CreateWindow(pp_int32& w, pp_int32& h, pp_int32& bp
 		w = getDefaultWidth();
 		h = getDefaultHeight();
 		
-		theWindow = SDL_CreateWindow("MilkyTracker", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, SDL_WINDOW_OPENGL | flags);
+		theWindow = SDL_CreateWindow("MilkyTracker", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, SDL_WINDOW_SHOWN);
 		
 		if (theWindow == NULL)
 		{
@@ -69,7 +71,7 @@ SDL_Window* PPDisplayDevice::CreateWindow(pp_int32& w, pp_int32& h, pp_int32& bp
 			return NULL;
 		}
 	}
-
+/*
 	SDL_GLContext ctx = SDL_GL_CreateContext(theWindow);
 	SDL_GL_MakeCurrent(theWindow, ctx);
 	
@@ -85,6 +87,7 @@ SDL_Window* PPDisplayDevice::CreateWindow(pp_int32& w, pp_int32& h, pp_int32& bp
 		fprintf(stdout, "Extensions : %s\n", glGetStringAPI(GL_EXTENSIONS));
 #endif
 	}
+	*/
 	// Prevent window from being resized below minimum
 	SDL_SetWindowMinimumSize(theWindow, w, h);
 	fprintf(stderr, "SDL: Minimum window size set to %dx%d.\n", w, h);
