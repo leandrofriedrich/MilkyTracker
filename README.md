@@ -4,14 +4,19 @@ Diverse Platform ports by me
 
 Big thanks to TheMorc (https://github.com/TheMorc) for letting me use stuff from his Ports and helping me out a lot in this Journey!
 
+## Port List:
+WiiU: https://github.com/leandrofriedrich/MilkyTracker/tree/wiiu
+
 ## WiiU Port Status
 Grab it at https://github.com/leandrofriedrich/MilkyTracker/tree/wiiu
 
+### Bugs/issues:
+
 - Ins. ed crashes when song is playing
-- when clicking home button, it either freezes or when exiting it gets stuck on the wii u menu loading screen, never actually reaching it
+- when clicking home button, it either freezes or when exiting it gets stuck on the wii u menu loading screen, never actually reaching it, which means one has to power-cycle the console
 
-
-
+### Controls
+![Wii U Controls](resources/pictures/wiiucontrols.png)
 
 Start of Original ReadMe
 ========================

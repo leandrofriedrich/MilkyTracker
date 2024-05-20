@@ -649,67 +649,94 @@ void wiiuMouseAxis(int axis, int value)
 
 void wiiuMouseButton(int button, int down)
 {
+	WHBLogPrintf("%d\n", button);
 	switch (button){
 		case 0:
+		{
+			//return
+			pp_uint16 chr[3] = {VK_RETURN, 0, 0};
+			PPEvent event(eKeyDown, &chr, sizeof(chr));
+			RaiseEventSerialized(&event);
+			break;
+		}
 		case 1:
+		{
+			//space
+			pp_uint16 chr[3] = {VK_SPACE, 0, 0};
+			PPEvent event(eKeyDown, &chr, sizeof(chr));
+			RaiseEventSerialized(&event);
+			break;
+		}
 		case 2:
+		{
+			//backspace
+			pp_uint16 chr[3] = {VK_BACK, 0, 0};
+			PPEvent event(eKeyDown, &chr, sizeof(chr));
+			RaiseEventSerialized(&event);
+			break;
+		}
 		case 3:
-			myDisplayDevice->update();
+		{
+			//control
+			pp_uint16 chr[3] = {VK_CONTROL, 0, 0};
+			PPEvent event(eKeyDown, &chr, sizeof(chr));
+			RaiseEventSerialized(&event);
 			break;
-			
-		case 5:
-			xDir = xDir + 13;
-			SDL_WarpMouseInWindow(myDisplayDevice->getWindow(),xDir, yDir);
-			break;
-			
-		case 7:
-			xDir = xDir - 13;
-			SDL_WarpMouseInWindow(myDisplayDevice->getWindow(),xDir, yDir);
-			break;
-			
-		case 6:
-			yDir = yDir + 13;
-			SDL_WarpMouseInWindow(myDisplayDevice->getWindow(),xDir, yDir);
-			break;
-			
-		case 4:
-			yDir = yDir - 13;
-			SDL_WarpMouseInWindow(myDisplayDevice->getWindow(),xDir, yDir);
-			break;
-			
-		case 14:
+		}
+		case 8:
+		{
+			//left mouse click
 			if(down)
 				translateMouseDownEvent(1, xDir, yDir);
 			else
 				translateMouseUpEvent(1, xDir, yDir);
 			break;
-			
-		case 13:
+		}
+		case 9:
+		{
+			//right mouse click
 			if(down)
-				translateMouseDownEvent(3, xDir, yDir);
+				translateMouseDownEvent(2, xDir, yDir);
 			else
-				translateMouseUpEvent(3, xDir, yDir);
+				translateMouseUpEvent(2, xDir, yDir);
 			break;
-		
-		case 15:
-			{
-			pp_uint16 chr2[3] = {0x4C, 0, 0};
-			PPEvent event3(eKeyDown, &chr2, sizeof(chr2));
-			RaiseEventSerialized(&event3);
-			}
-			break;
-			
+		}
 		case 12:
 		{
-			pp_uint16 chr[3] = {VK_RETURN, 0, 0};
+			//arrow left
+			pp_uint16 chr[3] = {VK_LEFT, 0, 0};
 			PPEvent event(eKeyDown, &chr, sizeof(chr));
 			RaiseEventSerialized(&event);
-		}
 			break;
-			
+		}
+		case 13:
+		{
+			//arrow up
+			pp_uint16 chr[3] = {VK_UP, 0, 0};
+			PPEvent event(eKeyDown, &chr, sizeof(chr));
+			RaiseEventSerialized(&event);
+			break;
+		}
+		case 14:
+		{
+			//arrow right
+			pp_uint16 chr[3] = {VK_RIGHT, 0, 0};
+			PPEvent event(eKeyDown, &chr, sizeof(chr));
+			RaiseEventSerialized(&event);
+			break;
+		}
+		case 15:
+		{
+			//arrow down
+			pp_uint16 chr[3] = {VK_DOWN, 0, 0};
+			PPEvent event(eKeyDown, &chr, sizeof(chr));
+			RaiseEventSerialized(&event);
+			break;
+		}
 	}
 	myDisplayDevice->update();
 }
+
 
 
 void translateKeyUpEvent(const SDL_Event& event)
